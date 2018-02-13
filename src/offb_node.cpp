@@ -110,7 +110,8 @@ int main(int argc, char **argv)
             }
         }
         // check how big error is and correct position
-        // current position - target position 
+        // current position - target position
+        
         //pose.pose.position.x = pose.pose.position.x + 0.1;
         cout << "x pos: " << pose.pose.position.x << endl;
         local_pos_pub.publish(pose);
