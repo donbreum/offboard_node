@@ -22,12 +22,10 @@ using namespace std;
 void do_stuff(int* publish_rate, std::string &dd){
   //ros::NodeHandlePtr node = boost::make_shared<ros::NodeHandle>();
   //ros::Publisher pub_b = node->advertise<std_msgs::Empty>("topic_b", 10);
-
-
   ros::Rate loop_rate(*publish_rate);
   while (ros::ok())
   {
-      dd = dd + "d";
+      //dd++;
     //ROS_INFO_STREAM("Hello, from thread! Count: ");
     // std_msgs::Empty msg;
     // pub_b.publish(msg);
@@ -35,14 +33,10 @@ void do_stuff(int* publish_rate, std::string &dd){
   }
 }
 
-
 mavros_msgs::State current_state;
 void state_cb(const mavros_msgs::State::ConstPtr& msg){
     current_state = *msg;
 }
-
-
-
 
 int main(int argc, char **argv)
 {
@@ -51,13 +45,11 @@ int main(int argc, char **argv)
     TopicInformation topicinfo(&nh);
     cout << "cout msg "<< endl;
     // extra
-    std::string dad = "dad";
-    int rate_b = 1; // 1 Hz
-    boost::thread thread_b(do_stuff, &rate_b,boost::ref(dad));
+    //string dad = 0;
+    int rate_b = 5; // 1 Hz
+    //boost::thread thread_b(do_stuff, &rate_b,boost::ref(dad));
 
     // own subscribe
-
-
     //
 
     ros::Subscriber state_sub = nh.subscribe<mavros_msgs::State>
@@ -99,8 +91,6 @@ int main(int argc, char **argv)
     arm_cmd.request.value = true;
 
     ros::Time last_request = ros::Time::now();
-
-
     while(ros::ok()){
         if( current_state.mode != "OFFBOARD" &&
             (ros::Time::now() - last_request > ros::Duration(5.0))){
@@ -119,7 +109,10 @@ int main(int argc, char **argv)
                 last_request = ros::Time::now();
             }
         }
-
+        // check how big error is and correct position
+        // current position - target position 
+        //pose.pose.position.x = pose.pose.position.x + 0.1;
+        cout << "x pos: " << pose.pose.position.x << endl;
         local_pos_pub.publish(pose);
         //ROS_INFO_STREAM("main thread - cnt: "+ dad);
         topicinfo.get_position_data();

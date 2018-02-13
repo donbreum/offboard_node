@@ -129,6 +129,7 @@ include_directories(${Eigen_INCLUDE_DIRS})
    ${${PROJECT_NAME}_src}
    src/offb_node.cpp
    src/TopicInformation.cpp
+   src/drone_control.cpp
  )
 
 ## Add cmake target dependencies of the library
@@ -139,7 +140,7 @@ include_directories(${Eigen_INCLUDE_DIRS})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(offb_node src/offb_node.cpp src/TopicInformation.cpp)
+ add_executable(offb_node src/offb_node.cpp src/TopicInformation.cpp src/drone_control.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
