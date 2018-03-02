@@ -11,27 +11,55 @@
 #include <string>
 #include <sensor_msgs/NavSatFix.h> // sensor_msgs::NavSatFix
 #include <mavros_msgs/Altitude.h> // mavros_msgs::Altitude
+#include <mavros_msgs/WaypointList.h> // mavros_msgs::WaypointList
+#include <std_msgs/Float64.h>
 
 using namespace std;
 
 class TopicInformation{
 
 public:
+  TopicInformation();
   TopicInformation(ros::NodeHandle* nodehandle);
   void get_position_data();
+  void get_waypoints();
+  int get_waypoint_index();
+  vector<float> get_current_waypoint();
+  vector<float> get_next_waypoint();
   void initializeSubscribers();
+  bool arm(bool arm);
+  void pose(geometry_msgs::PoseStamped pose);
+  void initialize_pose();
+  void set_mode();
 
+
+  void state_cb(const mavros_msgs::State::ConstPtr& msg);
   void nav_pos_cb(const sensor_msgs::NavSatFix::ConstPtr& msg);
   void altitude_cb(const mavros_msgs::Altitude::ConstPtr& msg);
+  void wps_cb(const mavros_msgs::WaypointList::ConstPtr& list);
+  void heading_cb(const std_msgs::Float64::ConstPtr& msg);
 
 private:
-
+std_msgs::Float64 heading;
+ros::NodeHandle nh;
 ros::Subscriber gps_pos_;
 ros::Subscriber alt_pos_;
+ros::Subscriber wps_;
 ros::NodeHandle nh_;
+ros::ServiceClient set_mode_client_;
+ros::Publisher local_pos_pub_;
+geometry_msgs::PoseStamped pose_;
+ros::Subscriber state_sub_;
+ros::ServiceClient arming_client_;
+ros::Time last_request = ros::Time::now();
+mavros_msgs::State current_state_;
+
+mavros_msgs::SetMode offb_set_mode;
+mavros_msgs::CommandBool arm_cmd;
+
 sensor_msgs::NavSatFix nav_pos;
 mavros_msgs::Altitude altitude;
-
+std::vector<mavros_msgs::Waypoint> mission_wps;
 
 };
 
