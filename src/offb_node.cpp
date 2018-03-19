@@ -20,6 +20,15 @@
 #include <mavros_msgs/Waypoint.h>
 
 
+
+#include <std_msgs/String.h>
+#include <stdio.h>
+#include <math.h>
+#include "geometry_msgs/Vector3Stamped.h"
+#include "std_msgs/Float64.h"
+#include <geometry_msgs/TwistStamped.h>
+
+
 using namespace Eigen;
 using namespace std;
 
@@ -31,11 +40,13 @@ using namespace std;
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, "offb_node");
-    //ros::NodeHandle nh;
+    ros::NodeHandle n;
     //TopicInformation topicinfo(&nh);
-    TopicInformation topicinfo;
+    //TopicInformation topicinfo;
     DroneControl drone_control;
 
+    ros::Publisher move_pub = n.advertise<geometry_msgs::TwistStamped>("mavros/setpoint_velocity/cmd_vel",10);
+    ros::Publisher local_pos_pub = n.advertise<geometry_msgs::PoseStamped> ("mavros/setpoint_position/local", 10);
 
     //the setpoint publishing rate MUST be faster than 2Hz
     ros::Rate rate(20.0);
@@ -43,25 +54,29 @@ int main(int argc, char **argv)
     ROS_INFO_STREAM("setup complete");
 
 
-    topicinfo.initialize_pose();
+    geometry_msgs::TwistStamped move_msg;
 
-    geometry_msgs::PoseStamped pose;
-    pose.pose.position.x = 0;
-    pose.pose.position.y = 0;
-    pose.pose.position.z = 2;
+    move_msg.twist.linear.x = 0.0;
+
+    // geometry_msgs::PoseStamped pose;
+    // pose.pose.position.x = 0;
+    // pose.pose.position.y = 0;
+    // pose.pose.position.z = 5  ;
     //
+    // //send a few setpoints before starting
     // for(int i = 100; ros::ok() && i > 0; --i){
+    //     move_pub.publish(move_msg);
     //     local_pos_pub.publish(pose);
     //     ros::spinOnce();
     //     rate.sleep();
     // }
-    topicinfo.set_mode();
-    topicinfo.arm(true);
+
+
     while(ros::ok()){
 
       drone_control.update_drone_position();
-      cout << "waypoint index: " << topicinfo.get_waypoint_index() << endl;
-      //topicinfo.pose(pose);
+      //move_pub.publish(move_msg);
+      //local_pos_pub.publish(pose);
 
       ros::spinOnce();
       rate.sleep();
