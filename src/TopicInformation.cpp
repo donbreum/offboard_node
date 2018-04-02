@@ -30,11 +30,13 @@ void TopicInformation::initializeSubscribers(){
   arming_client_ = nh_.serviceClient<mavros_msgs::CommandBool>
       ("mavros/cmd/arming");
 
+  // tried to use acceleration for the local body with AttitudeTarget
+  // but this never worked. Only thrust is working, not pitch, roll nor yaw
   mav_att_pub_ = nh_.advertise<mavros_msgs::AttitudeTarget>
       ( "mavros/setpoint_raw/attitude", 100 );
+
   target_velocity_ = nh_.advertise<geometry_msgs::TwistStamped>
       ("mavros/setpoint_velocity/cmd_vel",10);
-
 
 
   // wait for FCU connection
@@ -72,10 +74,7 @@ void TopicInformation::initialize_pose(){
 }
 
 void TopicInformation::pose(geometry_msgs::PoseStamped pose){
-
-  //cout << "send pose. " << endl;
   local_pos_pub_.publish(pose); // den her brugte jeg tidligere
-  //mav_att_pub_.publish(pose);
 }
 
 void TopicInformation::set_velocity(geometry_msgs::TwistStamped tw){

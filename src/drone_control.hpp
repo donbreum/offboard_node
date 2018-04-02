@@ -11,8 +11,20 @@
 #include "angles/angles.h"
 #include "pid.h"
 
+#include <numeric>
+
+// when a new waypoint is loaded, distance in meters
+#define threshold_distance_to_waypoint 3
+
 class TopicInformation;
 using namespace std;
+
+struct BodyVelocity{
+  double linear_x;
+  double linear_y;
+  double linear_z;
+  double angular_z;
+};
 
 class DroneControl{
 
@@ -20,7 +32,7 @@ public:
 
   DroneControl();
   DroneControl(TopicInformation tp);
-
+  void update_drone_data();
   void update_drone_position();
   float distance_between_two_coords(float lat1, float lon1, float lat2,
                                     float lon2);
@@ -29,21 +41,40 @@ public:
   float get_distance_to_current_waypoint();
   double get_bearing_to_current_waypoint();
   double get_bearing_to_current_waypoint_simple();
+  float calculate_cross_track_error(float bearing_target, float distance_to_wp,
+                                    float bearing_wp_to_wp);
+  double get_bearing_between_two_waypoints(float current_lat, float current_lon,
+                                           float target_lat, float target_lon);
   float add_angles(float a1, float a2);
+  void calculate_velocity_body(float bearing, float heading, float height,
+                               float bearing_pos_to_wp, float cross_track_err);
+  void set_velocity_body();
+  vector<double> get_target_heading_vector(float bearing);
 private:
 
-  TopicInformation topic_message;
-  std::vector<mavros_msgs::Waypoint> waypoint_list;
   TopicInformation tp;
+  std::vector<mavros_msgs::Waypoint> waypoint_list;
+  geometry_msgs::TwistStamped move_msg;
   int current_waypoint_index = 0;
   double initial_heading_rad = M_PI/2;
+  BodyVelocity body_velocity;
   PID pid_height = PID(0.1, 0.5, -0.5, 1.0, 0.0, 0.0);
   //PID pid_heading = PID(0.1, 0.5, -0.5, 0.05, 0.05, 0.0001);
   PID pid_heading = PID(0.1, 0.5, -0.5, 1.0, 0.1, 0.01);
+  PID pid_lat_cmd = PID(0.1, 3.0, -3.0, 0.3, 0.1, 0.001);
   bool is_north;
   bool is_east;
 
   int cnt = 0;
+
+  float current_pos_lat;
+  float current_pos_lon;
+  float previous_wp_lat;
+  float previous_wp_lon;
+  float next_wp_lat;
+  float next_wp_lon;
+  float heading;
+  float height;
 };
 
 

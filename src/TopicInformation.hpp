@@ -15,6 +15,7 @@
 #include <std_msgs/Float64.h>
 #include <geometry_msgs/TwistStamped.h>
 #include <geometry_msgs/Vector3Stamped.h>
+#include <geometry_msgs/Vector3.h>
 #include <mavros_msgs/AttitudeTarget.h>
 #include "tf/tf.h"
 
