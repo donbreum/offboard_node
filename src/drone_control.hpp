@@ -14,7 +14,7 @@
 #include <numeric>
 
 // when a new waypoint is loaded, distance in meters
-#define threshold_distance_to_waypoint 3
+#define threshold_distance_to_waypoint 20
 
 class TopicInformation;
 using namespace std;
