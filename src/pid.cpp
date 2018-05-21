@@ -1,6 +1,7 @@
 #ifndef _PID_SOURCE_
 #define _PID_SOURCE_
 
+// from https://gist.github.com/bradley219/5373998
 #include <iostream>
 #include <cmath>
 #include "pid.h"
@@ -34,7 +35,7 @@ double PID::calculate( double setpoint, double pv )
 {
     return pimpl->calculate(setpoint,pv);
 }
-PID::~PID() 
+PID::~PID()
 {
     delete pimpl;
 }
@@ -57,7 +58,7 @@ PIDImpl::PIDImpl( double dt, double max, double min, double Kp, double Kd, doubl
 
 double PIDImpl::calculate( double setpoint, double pv )
 {
-    
+
     // Calculate error
     double error = setpoint - pv;
 
