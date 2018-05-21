@@ -50,7 +50,6 @@ vector<double> DroneControl::get_target_heading_vector(float bearing){
   target_vector.push_back(y_vec);
   return target_vector;
 }
-
 float DroneControl::distance_between_two_coords_simple(float lat1, float lon1,
                                                 float lat2, float lon2){
   // OBS!! Does not work
@@ -65,7 +64,6 @@ float DroneControl::distance_between_two_coords_simple(float lat1, float lon1,
   float dummy;
   return dummy;
 }
-
 float DroneControl::distance_between_two_coords(float lat1, float lon1,
                                                 float lat2, float lon2){
   // return distance between two coordinates
@@ -107,7 +105,6 @@ float DroneControl::distance_between_two_coords(float lat1, float lon1,
 
   return d; // return distance in meters
 }
-
 float DroneControl::get_distance_to_current_waypoint(){
 
   // return -1 if there is no more waypoints
@@ -137,7 +134,6 @@ float DroneControl::get_distance_to_current_waypoint(){
   cout << "distance left: " << distance_to_next << endl;
   return distance_to_next;
 }
-
 float DroneControl::add_angles(float angle1, float angle2){
 
   float angle = angle1 + angle2;
@@ -150,7 +146,6 @@ float DroneControl::add_angles(float angle1, float angle2){
   // cout << "added angle: " << angle << endl;
   return angle;
 }
-
 double DroneControl::get_bearing_to_current_waypoint_simple(){
 
   // vector<float> position_data = tp.get_position_data();
@@ -201,7 +196,6 @@ double DroneControl::get_bearing_to_current_waypoint(){
   return angle_rad; // return in radians
   //return angle; // return angle in degrees
 }
-
 double DroneControl::get_bearing_between_two_waypoints(float current_lat,
                                                        float current_lon,
                                                        float target_lat,
@@ -232,7 +226,6 @@ double DroneControl::get_bearing_between_two_waypoints(float current_lat,
   return angle_rad; // return in radians
   //return angle; // return angle in degrees
 }
-
 void DroneControl::set_velocity_body(){
   vector<float> position_data = tp.get_position_data();
   float height = position_data[2];
@@ -252,7 +245,6 @@ void DroneControl::set_velocity_body(){
 
   tp.set_velocity(move_msg);
 }
-
 void DroneControl::calculate_velocity_body(float bearing, float heading,
                                            float height,
                                            float bearing_pos_to_wp,
@@ -316,11 +308,10 @@ void DroneControl::calculate_velocity_body(float bearing, float heading,
   body_velocity.angular_z = z_angular_velocity;
 
 }
-
+#pragma region cross_track_err
 float DroneControl::calculate_cross_track_error(float bearing_target,
                                                 float distance_to_wp,
                                                 float bearing_wp_to_wp){
-
 float theta = bearing_wp_to_wp - bearing_target;
 float theta_deg = angles::from_degrees(theta);
 if(theta_deg > 270)
@@ -335,7 +326,7 @@ cout << "cross_track_error: " << cross_track_error << endl;
 
 return cross_track_error;
 }
-
+#pragma endregion cross_track_err
 void DroneControl::update_drone_position(){
   float dist_to_next_wp = get_distance_to_current_waypoint();
   if(dist_to_next_wp < threshold_distance_to_waypoint){
