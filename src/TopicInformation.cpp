@@ -146,9 +146,9 @@ void TopicInformation::wps_cb(const mavros_msgs::WaypointList::ConstPtr& list){
   ROS_INFO("Waypoints loaded: %i", mission_wps.size());
   for(int k = 0; k < mission_wps.size(); k++){
     ROS_INFO("Waypoint [%i]: Command [%i] Longitude: [%f]"
-              " Lattitude: [%f] Altitude: [%f]", k+1, mission_wps[k].command,
-              mission_wps[k].y_long, mission_wps[k].x_lat,
-              mission_wps[k].z_alt);
+              " Lattitude: [%f] Altitude: [%f]", k+1,
+              mission_wps[k].command, mission_wps[k].y_long,
+              mission_wps[k].x_lat, mission_wps[k].z_alt);
   }
 }
 

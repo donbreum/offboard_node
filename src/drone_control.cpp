@@ -95,8 +95,6 @@ float DroneControl::distance_between_two_coords(float lat1, float lon1,
     // cout << "vector is pointing NORTH" << endl;
   }
 
-
-
   float lat1_rad = lat1*M_PI/180.0;
   float lat2_rad = lat2*M_PI/180.0;
 
@@ -155,19 +153,19 @@ float DroneControl::add_angles(float angle1, float angle2){
 
 double DroneControl::get_bearing_to_current_waypoint_simple(){
 
-  vector<float> position_data = tp.get_position_data();
-  float current_lat = position_data[0];
-  float current_lon = position_data[1];
-  float target_lat = waypoint_list[current_waypoint_index].x_lat;
-  float target_lon = waypoint_list[current_waypoint_index].y_long;
-
-  float off_x = target_lon - current_lon;
-  float off_y = target_lat - current_lat;
-  //float bearing = 90.00 + atan2(-off_y, off_x) * 57.2957795;
-  float bearing = M_PI/2.0 + atan2(-off_y, off_x);// * 57.2957795;
-  //cout << "Bearing in simple method: " << bearing << endl;
-  if(bearing < 0)
-      bearing += 2*M_PI;
+  // vector<float> position_data = tp.get_position_data();
+  // float current_lat = position_data[0];
+  // float current_lon = position_data[1];
+  // float target_lat = waypoint_list[current_waypoint_index].x_lat;
+  // float target_lon = waypoint_list[current_waypoint_index].y_long;
+  //
+  // float off_x = target_lon - current_lon;
+  // float off_y = target_lat - current_lat;
+  // //float bearing = 90.00 + atan2(-off_y, off_x) * 57.2957795;
+  // float bearing = M_PI/2.0 + atan2(-off_y, off_x);// * 57.2957795;
+  // //cout << "Bearing in simple method: " << bearing << endl;
+  // if(bearing < 0)
+  //     bearing += 2*M_PI;
       //bearing += 360.00;
 
   // cout << "Bearing in simple method: " << angles::to_degrees(bearing) << endl;
@@ -233,7 +231,6 @@ double DroneControl::get_bearing_between_two_waypoints(float current_lat,
   // cout << "Bearing in wp to wp: " << angles::to_degrees(angle_rad) << endl;
   return angle_rad; // return in radians
   //return angle; // return angle in degrees
-
 }
 
 void DroneControl::set_velocity_body(){
@@ -340,35 +337,86 @@ return cross_track_error;
 }
 
 void DroneControl::update_drone_position(){
-  float distance_to_next_wp = get_distance_to_current_waypoint();
-  if(distance_to_next_wp < threshold_distance_to_waypoint){
+  float dist_to_next_wp = get_distance_to_current_waypoint();
+  if(dist_to_next_wp < threshold_distance_to_waypoint){
     current_waypoint_index++;
   }
-  cnt++;
+
   update_drone_data();
 
-  float bearing = get_bearing_between_two_waypoints(previous_wp_lat,
-                                                    previous_wp_lon,
-                                                    next_wp_lat, next_wp_lon);
-  float bearing_pos_to_wp = get_bearing_between_two_waypoints(current_pos_lat,
-                                                              current_pos_lon,
-                                                              next_wp_lat,
-                                                              next_wp_lon);
+  int MAV_CMD =  waypoint_list[current_waypoint_index].command;
+  cout << "current command: " << MAV_CMD<< endl;
+  cout << "current waypoint: " << current_waypoint_index << endl;
+  if(takeoff_complete)
+    cout << "takeoff complete " << endl;
 
-  float cross_track_error = calculate_cross_track_error(bearing_pos_to_wp,
-                                                         distance_to_next_wp,
-                                                         bearing);
+  switch(MAV_CMD){
+    case MAV_CMD_NAV_TAKEOFF:{
+      float target_alt = waypoint_list[current_waypoint_index].z_alt; // target altitude
+      body_velocity.linear_z =  pid_height.calculate(target_alt, height); //set height 0
+      cout << "diff altitude: " << abs(target_alt - height) << endl;
+      if(abs(target_alt - height) < 2){
+        takeoff_complete = true;
+        float bearing = get_bearing_between_two_waypoints(previous_wp_lat,
+                                                          previous_wp_lon,
+                                                          next_wp_lat,
+                                                          next_wp_lon);
+        float bearing_pos_to_wp = get_bearing_between_two_waypoints(cur_pos_lat,
+                                                                    cur_pos_lon,
+                                                                    next_wp_lat,
+                                                                    next_wp_lon);
 
-  calculate_velocity_body(bearing, heading, height, bearing_pos_to_wp,
-                          cross_track_error);
+        float cross_track_error = calculate_cross_track_error(bearing_pos_to_wp,
+                                                               dist_to_next_wp,
+                                                               bearing);
+
+      calculate_velocity_body(bearing, heading, height, bearing_pos_to_wp,
+                              cross_track_error);
+      }
+      break;
+    }
+    case MAV_CMD_NAV_WAYPOINT:{
+      float bearing = get_bearing_between_two_waypoints(previous_wp_lat,
+                                                        previous_wp_lon,
+                                                        next_wp_lat,
+                                                        next_wp_lon);
+      float bearing_pos_to_wp = get_bearing_between_two_waypoints(cur_pos_lat,
+                                                                  cur_pos_lon,
+                                                                  next_wp_lat,
+                                                                  next_wp_lon);
+
+      float cross_track_error = calculate_cross_track_error(bearing_pos_to_wp,
+                                                             dist_to_next_wp,
+                                                             bearing);
+
+    calculate_velocity_body(bearing, heading, height, bearing_pos_to_wp,
+                            cross_track_error);
+
+      break;
+    }
+    // case MAV_CMD_NAV_LOITER_UNLIM:{
+    //   body_velocity.linear_z =  pid_height.calculate(0, height); //set height 0
+    //   break;
+    // }
+    // case MAV_CMD_NAV_LAND:{
+    //
+    //   break;
+    // }
+    default:{
+      cout << "NO VALID COMMAND FROM MAVLINK - LAND AT LOCATION" << endl;
+      body_velocity.linear_z = pid_height.calculate(0, height); // set height 0
+      break;
+      }
+  }
+
   set_velocity_body();
 }
 
 void DroneControl::update_drone_data(){
   // these must be initaliezed in the constructor
   vector<float> position_data = tp.get_position_data();
-  current_pos_lat = position_data[0];
-  current_pos_lon = position_data[1];
+  cur_pos_lat = position_data[0];
+  cur_pos_lon = position_data[1];
   previous_wp_lat = waypoint_list[current_waypoint_index].x_lat;;
   previous_wp_lon = waypoint_list[current_waypoint_index].y_long;
   next_wp_lat = waypoint_list[current_waypoint_index+1].x_lat;

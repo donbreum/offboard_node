@@ -13,8 +13,18 @@
 
 #include <numeric>
 
+#define MAV_CMD_NAV_WAYPOINT 16
+#define MAV_CMD_NAV_LOITER_UNLIM 17
+#define MAV_CMD_NAV_LOITER_TURNS 18
+#define MAV_CMD_NAV_LOITER_TIME 19
+#define MAV_CMD_NAV_RETURN_TO_LAUNCH 20
+#define MAV_CMD_NAV_LAND 21
+#define MAV_CMD_NAV_TAKEOFF 22
+#define MAV_CMD_NAV_LAND_LOCAL 23
+#define MAV_CMD_NAV_TAKEOFF_LOCAL 24
+
 // when a new waypoint is loaded, distance in meters
-#define threshold_distance_to_waypoint 20
+#define threshold_distance_to_waypoint 3
 
 class TopicInformation;
 using namespace std;
@@ -67,8 +77,10 @@ private:
 
   int cnt = 0;
 
-  float current_pos_lat;
-  float current_pos_lon;
+  bool takeoff_complete = false;
+
+  float cur_pos_lat;
+  float cur_pos_lon;
   float previous_wp_lat;
   float previous_wp_lon;
   float next_wp_lat;

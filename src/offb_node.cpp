@@ -53,7 +53,6 @@ int main(int argc, char **argv)
 
     ROS_INFO_STREAM("setup complete");
 
-
     geometry_msgs::TwistStamped move_msg;
 
     move_msg.twist.linear.x = 0.0;
