@@ -58,8 +58,11 @@ public:
   float add_angles(float a1, float a2);
   void calculate_velocity_body(float bearing, float heading, float height,
                                float bearing_pos_to_wp, float cross_track_err);
+  void calculate_velocity_angular(float bearing, float heading);
+  void calculate_velocity_vertical(float target_height, float height);
   void set_velocity_body();
   vector<double> get_target_heading_vector(float bearing);
+  
 private:
 
   TopicInformation tp;
